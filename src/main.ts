@@ -110,12 +110,14 @@ const TABS = ['home', 'reports', 'settings'];
 let currentTabIndex = 0;
 
 (window as any).switchTab = function(tabId: string, el?: HTMLElement) {
+  if (navigator.vibrate) navigator.vibrate(10);
   currentTabIndex = TABS.indexOf(tabId);
   if (currentTabIndex === -1) currentTabIndex = 0;
   
   const wrapper = document.getElementById('tabs-wrapper');
   if (wrapper) {
     requestAnimationFrame(() => {
+      wrapper.style.transition = 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)';
       wrapper.style.transform = `translateX(-${currentTabIndex * 33.3333}%)`;
     });
   }
@@ -134,6 +136,7 @@ let currentTabIndex = 0;
 
 // --- SETTINGS LOGIC ---
 (window as any).saveSetting = async function(key: string, val: string) {
+  if (navigator.vibrate) navigator.vibrate(15);
   await setSetting(key, Number(val));
   updateState();
   (window as any).showToast('Saved!');
@@ -164,14 +167,14 @@ function updateAccDisplay() {
 }
 
 (window as any).addNum = function(val: number) {
-  if (navigator.vibrate) navigator.vibrate(50);
+  if (navigator.vibrate) navigator.vibrate(10);
   acc += val;
   tapHistory.push(val);
   updateAccDisplay();
 };
 
 (window as any).undoTap = function() {
-  if (navigator.vibrate) navigator.vibrate(50);
+  if (navigator.vibrate) navigator.vibrate(15);
   if (tapHistory.length === 0) return (window as any).showToast('Nothing to undo');
   const last = tapHistory.pop();
   if (last) acc -= last;
@@ -179,14 +182,14 @@ function updateAccDisplay() {
 };
 
 (window as any).clearNum = function() {
-  if (navigator.vibrate) navigator.vibrate(50);
+  if (navigator.vibrate) navigator.vibrate(20);
   acc = 0; 
   tapHistory = [];
   updateAccDisplay();
 };
 
 (window as any).logTransaction = async function() {
-  if (navigator.vibrate) navigator.vibrate(50);
+  if (navigator.vibrate) navigator.vibrate([15, 50, 15]);
   if (acc === 0) return (window as any).showToast('Tap a number to log!');
   
   const tx = {
@@ -553,7 +556,7 @@ async function updateState() {
   if (historyContainer) {
     historyContainer.innerHTML = '';
     const recentTxs = txs.slice(0, 50); // Show last 50 transactions regardless of period
-    recentTxs.forEach(tx => {
+    recentTxs.forEach((tx, index) => {
       const date = new Date(tx.timestamp);
       const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
@@ -564,8 +567,10 @@ async function updateState() {
       const iconColor = '#FFFFFF'; // High contrast white
       const safeIcon = sanitizeIcon(tx.icon);
       
+      const delay = Math.min(index * 0.03, 0.3); // Stagger up to 0.3s
+      
       const entryHtml = `
-        <div class="swipe-container">
+        <div class="swipe-container" style="animation-delay: ${delay}s">
           <div class="swipe-scroll">
             <div class="swipe-front" onclick="openEdit(${tx.id}, '${tx.note.replace(/'/g, "\\'")}', ${tx.amount}, '${tx.type}', '${safeIcon}', ${tx.timestamp})">
               <div class="entry-left">
@@ -845,6 +850,7 @@ let toastTimer: any;
 
 // --- THEME & SETTINGS ---
 (window as any).setTheme = async function(el: HTMLElement | null, hex: string, save = true) {
+  if (navigator.vibrate && save) navigator.vibrate(15);
   document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
   if (el) {
     el.classList.add('selected');
@@ -915,6 +921,7 @@ let currentEditType = 'spend';
 let currentEditTimestamp = 0;
 
 (window as any).openEdit = function(id: number, note: string, amt: number, type: string, icon: string, timestamp: number) {
+  if (navigator.vibrate) navigator.vibrate(15);
   currentEditId = id;
   currentEditIcon = icon;
   currentEditTimestamp = timestamp;
@@ -973,7 +980,7 @@ let currentEditTimestamp = 0;
 };
 
 (window as any).saveEdit = async function() {
-  if (navigator.vibrate) navigator.vibrate(50);
+  if (navigator.vibrate) navigator.vibrate([15, 30, 15]);
   if (currentEditId === null) return;
   
   const noteInput = document.getElementById('edit-note-input') as HTMLInputElement;
@@ -1052,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 (window as any).deleteTx = async function(id: number, event: Event) {
   event.stopPropagation();
-  if (navigator.vibrate) navigator.vibrate(50);
+  if (navigator.vibrate) navigator.vibrate([15, 30, 15]);
   await deleteTransaction(id);
   (window as any).showToast('Transaction deleted');
   updateState();
@@ -1101,10 +1108,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- SWIPE NAVIGATION LOGIC ---
   const appContainer = document.querySelector('.app-container');
-  if (appContainer) {
+  const tabsWrapper = document.getElementById('tabs-wrapper');
+  if (appContainer && tabsWrapper) {
     let startX = 0;
     let startY = 0;
     let isSwiping = false;
+    let currentTranslate = 0;
 
     appContainer.addEventListener('touchstart', (e: any) => {
       if (e.target.closest('.home-cat-slider') || 
@@ -1120,6 +1129,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
       isSwiping = true;
+      currentTranslate = currentTabIndex * -33.3333;
+      tabsWrapper.style.transition = 'none';
     }, { passive: true });
 
     let isTicking = false;
@@ -1137,6 +1148,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         // If scrolling vertically more than horizontally, or moving vertically by more than 15px, cancel swipe
         if (Math.abs(diffY) > Math.abs(diffX) || Math.abs(diffY) > 15) {
           isSwiping = false;
+          tabsWrapper.style.transition = 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)';
+          tabsWrapper.style.transform = `translateX(-${currentTabIndex * 33.3333}%)`;
+        } else if (isSwiping) {
+          const percentMove = (diffX / window.innerWidth) * 33.3333;
+          let newTranslate = currentTranslate + percentMove;
+          // Add resistance at edges
+          if (newTranslate > 0) newTranslate = newTranslate / 3;
+          if (newTranslate < -66.6666) newTranslate = -66.6666 + ((newTranslate + 66.6666) / 3);
+          
+          tabsWrapper.style.transform = `translateX(${newTranslate}%)`;
         }
         isTicking = false;
       });
@@ -1145,7 +1166,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     appContainer.addEventListener('touchend', (e: any) => {
       if (!isSwiping) return;
       const diffX = e.changedTouches[0].clientX - startX;
-      const threshold = 80; // increased threshold to prevent accidental swipes
+      const threshold = window.innerWidth * 0.2; // 20% of screen width to switch
+      
+      tabsWrapper.style.transition = 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)';
       
       if (diffX > threshold && currentTabIndex > 0) {
         // Swipe right -> go to previous tab
@@ -1153,6 +1176,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else if (diffX < -threshold && currentTabIndex < TABS.length - 1) {
         // Swipe left -> go to next tab
         (window as any).switchTab(TABS[currentTabIndex + 1]);
+      } else {
+        // Snap back
+        tabsWrapper.style.transform = `translateX(-${currentTabIndex * 33.3333}%)`;
       }
       isSwiping = false;
     });

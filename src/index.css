@@ -77,7 +77,7 @@ body { background: #000; display: flex; justify-content: center; align-items: ce
   width: 300%;
   flex: 1;
   min-height: 0;
-  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   will-change: transform;
   backface-visibility: hidden;
 }
@@ -131,7 +131,7 @@ body { background: #000; display: flex; justify-content: center; align-items: ce
 .home-cat-btn.selected { opacity: 1; background: var(--numpad-cat-selected); border-color: var(--numpad-cat-border); color: var(--numpad-cat-selected-text); filter: var(--numpad-cat-shadow); }
 
 .np-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
-.np-btn { background: var(--numpad-bg); border: 1px solid var(--numpad-border); backdrop-filter: blur(var(--numpad-blur)); -webkit-backdrop-filter: blur(var(--numpad-blur)); padding: 12px 0; border-radius: 10px; font-size: 16px; font-weight: 800; color: var(--numpad-text); cursor: pointer; transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s; will-change: transform;}
+.np-btn { background: var(--numpad-bg); border: 1px solid var(--numpad-border); backdrop-filter: blur(var(--numpad-blur)); -webkit-backdrop-filter: blur(var(--numpad-blur)); padding: 12px 0; border-radius: 10px; font-size: 16px; font-weight: 800; color: var(--numpad-text); cursor: pointer; transition: transform 0.1s cubic-bezier(0.32, 0.72, 0, 1), background 0.15s; will-change: transform;}
 .np-btn:active { background: rgba(255,255,255,0.15); transform: scale(0.92); }
 
 /* Custom Numpad BG Styles */
@@ -141,13 +141,17 @@ body { background: #000; display: flex; justify-content: center; align-items: ce
 }
 
 .np-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.action-btn { padding: 12px 0; border: none; border-radius: 10px; font-weight: 800; font-size: 15px; cursor: pointer; transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
+.action-btn { padding: 12px 0; border: none; border-radius: 10px; font-weight: 800; font-size: 15px; cursor: pointer; transition: transform 0.1s cubic-bezier(0.32, 0.72, 0, 1); will-change: transform; }
 .action-btn:active { transform: scale(0.95); }
 .btn-log { background: var(--numpad-log-bg); color: var(--numpad-log-text); }
 .btn-clear { background: var(--numpad-clear-bg); color: var(--numpad-clear-text); }
 
 .currency-symbol { font-size: 0.8em; opacity: 0.7; font-weight: 600; margin-right: 2px; }
-.swipe-container { width: 100%; overflow: hidden; border-radius: 16px; margin-bottom: 8px; background: var(--card2); border: 1px solid var(--border); }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.swipe-container { width: 100%; overflow: hidden; border-radius: 16px; margin-bottom: 8px; background: var(--card2); border: 1px solid var(--border); animation: slideIn 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
 .swipe-scroll { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .swipe-scroll::-webkit-scrollbar { display: none; }
 .swipe-front { flex: 0 0 100%; scroll-snap-align: start; background: var(--card); padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
