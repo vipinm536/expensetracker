@@ -100,6 +100,7 @@ let weeklyBudget = 3000;
 let acc = 0;
 let tapHistory: number[] = [];
 let globalCurrency = '₹';
+let appTheme: 'glass' | 'solid' = 'glass';
 let remindersEnabled = false;
 let reminderTime = '20';
 let lastReminderDate = '';
@@ -253,15 +254,17 @@ function getStartDate(period: string) {
   const now = new Date();
   if (period === 'weekly') {
     const day = now.getDay();
-    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
     const start = new Date(now.setDate(diff));
     start.setHours(0, 0, 0, 0);
     return start.getTime();
   } else if (period === 'monthly') {
     const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    start.setHours(0, 0, 0, 0);
     return start.getTime();
   } else if (period === 'yearly') {
     const start = new Date(now.getFullYear(), 0, 1);
+    start.setHours(0, 0, 0, 0);
     return start.getTime();
   } else {
     return 0; // All time
@@ -334,17 +337,6 @@ function renderHomeCategories() {
   // Update contrast for the new buttons based on current theme
   const hex = document.documentElement.style.getPropertyValue('--accent') || '#C8FF00';
   const isDark = ['#4DBBFF', '#B46DFF', '#FF6B4D'].includes(hex);
-  document.querySelectorAll('.home-cat-btn').forEach((b: any) => {
-    if (b.classList.contains('selected')) {
-      b.style.color = isDark ? '#fff' : '#000';
-      b.style.background = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
-      b.style.borderColor = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)';
-    } else {
-      b.style.color = isDark ? '#fff' : '#000';
-      b.style.background = 'transparent';
-      b.style.borderColor = 'transparent';
-    }
-  });
 }
 
 function renderEditCategories() {
@@ -451,6 +443,10 @@ async function updateState() {
   if (trendBox) {
     trendBox.innerHTML = '';
     const now = Date.now();
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayStartMs = todayStart.getTime();
+    
     let effectiveStart = startOfPeriod;
     
     let bucketCount = 7;
@@ -491,7 +487,10 @@ async function updateState() {
 
     txs.forEach(tx => {
       if (tx.timestamp >= effectiveStart && tx.type === 'spend') {
-        buckets[getBucketIdx(tx.timestamp)] += tx.amount;
+        const idx = getBucketIdx(tx.timestamp);
+        if (idx >= 0 && idx < bucketCount) {
+          buckets[idx] += tx.amount;
+        }
       }
     });
 
@@ -553,7 +552,8 @@ async function updateState() {
   const historyContainer = document.getElementById('history-container');
   if (historyContainer) {
     historyContainer.innerHTML = '';
-    txs.forEach(tx => {
+    const recentTxs = txs.slice(0, 50); // Show last 50 transactions regardless of period
+    recentTxs.forEach(tx => {
       const date = new Date(tx.timestamp);
       const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
@@ -622,6 +622,26 @@ async function updateState() {
 };
 
 // --- SETTINGS LOGIC ---
+(window as any).setAppTheme = async function(theme: 'glass' | 'solid') {
+  if (navigator.vibrate) navigator.vibrate(15);
+  appTheme = theme;
+  await setSetting('appTheme', theme);
+  document.body.className = `theme-${appTheme}`;
+  
+  // Update toggle UI
+  const glassBtn = document.getElementById('theme-btn-glass');
+  const solidBtn = document.getElementById('theme-btn-solid');
+  if (glassBtn && solidBtn) {
+    if (theme === 'glass') {
+      glassBtn.classList.add('active');
+      solidBtn.classList.remove('active');
+    } else {
+      solidBtn.classList.add('active');
+      glassBtn.classList.remove('active');
+    }
+  }
+};
+
 (window as any).openCurrencySelector = function() {
   if (navigator.vibrate) navigator.vibrate(15);
   const overlay = document.getElementById('currency-overlay');
@@ -843,51 +863,15 @@ let toastTimer: any;
   // Manage Numpad contrast
   const numpad = document.getElementById('numpad-wrapper');
   const isDark = ['#4DBBFF', '#B46DFF', '#FF6B4D'].includes(hex);
-  const textColor = isDark ? '#fff' : '#000';
+  const textColor = isDark ? '#ffffff' : '#000000';
   
-  if (numpad) {
-    if(isDark) {
-      numpad.style.color = '#fff';
-      const npDisplay = document.getElementById('np-display');
-      if (npDisplay) npDisplay.style.color = '#fff';
-      document.querySelectorAll('.np-btn, .np-undo, .btn-clear').forEach((b: any) => {
-        b.style.color = '#fff';
-        b.style.background = 'rgba(255,255,255,0.2)';
-      });
-      document.querySelectorAll('.home-cat-btn').forEach((b: any) => {
-        b.style.color = '#fff';
-        if (b.classList.contains('selected')) {
-          b.style.background = 'rgba(255,255,255,0.2)';
-          b.style.borderColor = 'rgba(255,255,255,0.3)';
-        }
-      });
-      const btnLog = document.querySelector('.btn-log') as HTMLElement;
-      if (btnLog) {
-        btnLog.style.background = '#fff';
-        btnLog.style.color = '#000';
-      }
-    } else {
-      numpad.style.color = '#000';
-      const npDisplay = document.getElementById('np-display');
-      if (npDisplay) npDisplay.style.color = '#000';
-      document.querySelectorAll('.np-btn, .np-undo, .btn-clear').forEach((b: any) => {
-        b.style.color = '#000';
-        b.style.background = 'rgba(0,0,0,0.1)';
-      });
-      document.querySelectorAll('.home-cat-btn').forEach((b: any) => {
-        b.style.color = '#000';
-        if (b.classList.contains('selected')) {
-          b.style.background = 'rgba(0,0,0,0.15)';
-          b.style.borderColor = 'rgba(0,0,0,0.2)';
-        }
-      });
-      const btnLog = document.querySelector('.btn-log') as HTMLElement;
-      if (btnLog) {
-        btnLog.style.background = '#000';
-        btnLog.style.color = hex;
-      }
-    }
-  }
+  document.documentElement.style.setProperty('--accent-text', textColor);
+  document.documentElement.style.setProperty('--accent-btn-bg', isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.05)');
+  document.documentElement.style.setProperty('--accent-btn-border', isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.12)');
+  document.documentElement.style.setProperty('--accent-btn-active', isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.15)');
+  document.documentElement.style.setProperty('--accent-log-bg', isDark ? '#ffffff' : '#000000');
+  document.documentElement.style.setProperty('--accent-log-text', isDark ? '#000000' : hex);
+  document.documentElement.style.setProperty('--accent-glow', isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.2)');
   
   const saveBtn = document.querySelector('.save-btn') as HTMLElement;
   if (saveBtn) saveBtn.style.color = textColor;
@@ -1080,6 +1064,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   (window as any).setTheme(null, savedColor, false);
   
   globalCurrency = await getSetting('currency', '₹') as string;
+  appTheme = await getSetting('appTheme', 'glass') as 'glass' | 'solid';
+  document.body.className = `theme-${appTheme}`;
+  
+  // Initialize theme toggle UI
+  const glassBtn = document.getElementById('theme-btn-glass');
+  const solidBtn = document.getElementById('theme-btn-solid');
+  if (glassBtn && solidBtn) {
+    if (appTheme === 'glass') {
+      glassBtn.classList.add('active');
+      solidBtn.classList.remove('active');
+    } else {
+      solidBtn.classList.add('active');
+      glassBtn.classList.remove('active');
+    }
+  }
+  
   remindersEnabled = await getSetting('remindersEnabled', false) as boolean;
   reminderTime = await getSetting('reminderTime', '20') as string;
   lastReminderDate = await getSetting('lastReminderDate', '') as string;
@@ -1100,17 +1100,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // --- SWIPE NAVIGATION LOGIC ---
-  const tabsWrapper = document.getElementById('tabs-wrapper');
-  if (tabsWrapper) {
+  const appContainer = document.querySelector('.app-container');
+  if (appContainer) {
     let startX = 0;
     let startY = 0;
     let isSwiping = false;
 
-    tabsWrapper.addEventListener('touchstart', (e: any) => {
+    appContainer.addEventListener('touchstart', (e: any) => {
       if (e.target.closest('.home-cat-slider') || 
           e.target.closest('.icon-slider') || 
           e.target.closest('.swipe-scroll') || 
-          e.target.closest('.trend-box')) {
+          e.target.closest('.trend-box') ||
+          e.target.closest('#numpad-wrapper') ||
+          e.target.closest('.setting-row') ||
+          e.target.closest('input') ||
+          e.target.closest('button')) {
         return;
       }
       startX = e.touches[0].clientX;
@@ -1119,7 +1123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, { passive: true });
 
     let isTicking = false;
-    tabsWrapper.addEventListener('touchmove', (e) => {
+    appContainer.addEventListener('touchmove', (e: any) => {
       if (!isSwiping || isTicking) return;
       
       const currentX = e.touches[0].clientX;
@@ -1138,7 +1142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }, { passive: true });
 
-    tabsWrapper.addEventListener('touchend', (e) => {
+    appContainer.addEventListener('touchend', (e: any) => {
       if (!isSwiping) return;
       const diffX = e.changedTouches[0].clientX - startX;
       const threshold = 80; // increased threshold to prevent accidental swipes

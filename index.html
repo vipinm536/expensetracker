@@ -119,6 +119,14 @@
     </div>
 
     <div class="setting-row">
+      <div class="setting-label">App Theme</div>
+      <div class="theme-toggle" style="display: flex; background: var(--card2); border-radius: 12px; padding: 4px;">
+        <div class="theme-btn glass" id="theme-btn-glass" onclick="setAppTheme('glass')" style="padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Glass</div>
+        <div class="theme-btn solid" id="theme-btn-solid" onclick="setAppTheme('solid')" style="padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Solid</div>
+      </div>
+    </div>
+
+    <div class="setting-row">
       <div class="setting-label">Smart Reminders</div>
       <button class="action-btn btn-clear" style="padding: 8px 16px; width: auto; font-size: 14px;" id="reminder-toggle" onclick="toggleReminders()">Enable</button>
     </div>

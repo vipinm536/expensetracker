@@ -3,11 +3,60 @@
 :root {
   --accent: #C8FF00; /* Default Lime */
   --bg: #121212;
+  --text: #F0F0F0;
+  --muted: #888888;
+}
+
+body.theme-glass {
   --card: rgba(30, 30, 30, 0.65);
   --card2: rgba(255, 255, 255, 0.08);
   --border: rgba(255, 255, 255, 0.08);
-  --text: #F0F0F0;
-  --muted: #888888;
+  --nav-bg: rgba(18, 18, 18, 0.65);
+  --sheet-bg: rgba(18, 18, 18, 0.85);
+  --blur-val: 20px;
+  --nav-blur: 24px;
+  --numpad-card-bg: linear-gradient(135deg, color-mix(in srgb, var(--accent) 15%, var(--card)), var(--card));
+  --numpad-card-border: var(--border);
+  --numpad-bg: rgba(255, 255, 255, 0.08);
+  --numpad-border: rgba(255, 255, 255, 0.12);
+  --numpad-blur: 12px;
+  --numpad-text: var(--text);
+  --numpad-cat-bg: rgba(255, 255, 255, 0.05);
+  --numpad-cat-selected: rgba(255, 255, 255, 0.2);
+  --numpad-cat-border: rgba(255, 255, 255, 0.3);
+  --numpad-cat-selected-text: #000000;
+  --numpad-cat-shadow: drop-shadow(0 0 6px var(--accent));
+  --numpad-log-bg: #FFFFFF;
+  --numpad-log-text: #000000;
+  --numpad-clear-bg: rgba(255, 255, 255, 0.08);
+  --numpad-clear-text: var(--text);
+  --numpad-divider: rgba(255, 255, 255, 0.1);
+}
+
+body.theme-solid {
+  --card: #1E1E1E;
+  --card2: #252525;
+  --border: #333333;
+  --nav-bg: #121212;
+  --sheet-bg: #121212;
+  --blur-val: 0px;
+  --nav-blur: 0px;
+  --numpad-card-bg: var(--accent);
+  --numpad-card-border: transparent;
+  --numpad-bg: var(--accent-btn-bg);
+  --numpad-border: var(--accent-btn-border);
+  --numpad-blur: 0px;
+  --numpad-text: var(--accent-text);
+  --numpad-cat-bg: transparent;
+  --numpad-cat-selected: var(--accent-btn-active);
+  --numpad-cat-border: var(--accent-btn-border);
+  --numpad-cat-selected-text: var(--accent-text);
+  --numpad-cat-shadow: drop-shadow(0 0 6px var(--accent-glow));
+  --numpad-log-bg: var(--accent-log-bg);
+  --numpad-log-text: var(--accent-log-text);
+  --numpad-clear-bg: var(--accent-btn-bg);
+  --numpad-clear-text: var(--accent-text);
+  --numpad-divider: var(--accent-btn-bg);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif !important; }
@@ -15,10 +64,11 @@
 body { background: #000; display: flex; justify-content: center; align-items: center; min-height: 100vh; overscroll-behavior-y: none; }
 
 .app-container {
-  width: 100%; max-width: 400px; height: 100vh; 
+  width: 100vw; max-width: 400px; height: 100vh; 
   background-color: var(--bg);
   background-image: radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 15%, transparent), transparent 60%);
   display: flex; flex-direction: column; position: relative; overflow: hidden;
+  touch-action: pan-y;
 }
 
 /* TABS */
@@ -50,7 +100,7 @@ body { background: #000; display: flex; justify-content: center; align-items: ce
 .hero-card {
   background: var(--card); border: 1px solid var(--border); border-radius: 24px;
   padding: 24px; position: relative; overflow: hidden; margin-bottom: 16px;
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val));
 }
 .hero-label { font-size: 12px; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
 .hero-amount { font-size: 48px; font-weight: 800; color: var(--text); margin: 5px 0; letter-spacing: -2px; }
@@ -66,34 +116,35 @@ body { background: #000; display: flex; justify-content: center; align-items: ce
 .pop-anim { animation: pop 0.2s ease-out; }
 
 .numpad-card {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 15%, var(--card)), var(--card)); border-radius: 24px; padding: 20px; margin-bottom: 24px;
-  border: 1px solid var(--border);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  background: var(--numpad-card-bg); border-radius: 24px; padding: 20px; margin-bottom: 24px;
+  border: 1px solid var(--numpad-card-border);
+  backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val));
   transition: background 0.3s;
 }
 .np-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.np-total { font-size: 28px; font-weight: 800; color: #000; letter-spacing: -1px; min-height: 34px; }
-.np-undo { background: rgba(0,0,0,0.1); border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; color: #000;}
+.np-total { font-size: 28px; font-weight: 800; color: var(--numpad-text); letter-spacing: -1px; min-height: 34px; }
+.np-undo { background: var(--numpad-bg); border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; color: var(--numpad-text);}
 
-.home-cat-slider { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 12px; margin-bottom: 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; border-bottom: 1px solid rgba(0,0,0,0.1); }
+.home-cat-slider { display: flex; overflow-x: auto; gap: 10px; padding: 8px 8px 12px 8px; margin: -8px -8px 12px -8px; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; border-bottom: 1px solid var(--numpad-divider); }
 .home-cat-slider::-webkit-scrollbar { display: none; }
-.home-cat-btn { flex: 0 0 42px; height: 42px; border-radius: 12px; background: rgba(0,0,0,0.05); border: 1px solid transparent; display: flex; align-items: center; justify-content: center; color: #000; opacity: 0.4; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; }
-.home-cat-btn.selected { opacity: 1; background: rgba(0,0,0,0.15); border-color: rgba(0,0,0,0.2); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); color: var(--accent); filter: drop-shadow(0 0 6px var(--accent)); }
+.home-cat-btn { flex: 0 0 42px; height: 42px; border-radius: 12px; background: var(--numpad-cat-bg); border: 1px solid transparent; display: flex; align-items: center; justify-content: center; color: var(--numpad-text); opacity: 0.6; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; }
+.home-cat-btn.selected { opacity: 1; background: var(--numpad-cat-selected); border-color: var(--numpad-cat-border); color: var(--numpad-cat-selected-text); filter: var(--numpad-cat-shadow); }
 
 .np-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
-.np-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); padding: 12px 0; border-radius: 10px; font-size: 16px; font-weight: 800; color: #FFFFFF; cursor: pointer; transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s; will-change: transform;}
+.np-btn { background: var(--numpad-bg); border: 1px solid var(--numpad-border); backdrop-filter: blur(var(--numpad-blur)); -webkit-backdrop-filter: blur(var(--numpad-blur)); padding: 12px 0; border-radius: 10px; font-size: 16px; font-weight: 800; color: var(--numpad-text); cursor: pointer; transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s; will-change: transform;}
 .np-btn:active { background: rgba(255,255,255,0.15); transform: scale(0.92); }
 
 /* Custom Numpad BG Styles */
 #numpad-wrapper {
   transition: background 0.3s;
+  color: var(--numpad-text);
 }
 
 .np-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .action-btn { padding: 12px 0; border: none; border-radius: 10px; font-weight: 800; font-size: 15px; cursor: pointer; transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); will-change: transform; }
 .action-btn:active { transform: scale(0.95); }
-.btn-log { background: #000; color: var(--accent); }
-.btn-clear { background: rgba(0,0,0,0.15); color: #000; }
+.btn-log { background: var(--numpad-log-bg); color: var(--numpad-log-text); }
+.btn-clear { background: var(--numpad-clear-bg); color: var(--numpad-clear-text); }
 
 .currency-symbol { font-size: 0.8em; opacity: 0.7; font-weight: 600; margin-right: 2px; }
 .swipe-container { width: 100%; overflow: hidden; border-radius: 16px; margin-bottom: 8px; background: var(--card2); border: 1px solid var(--border); }
@@ -117,15 +168,15 @@ body { background: #000; display: flex; justify-content: center; align-items: ce
 
 /* REPORTS / LIMITS TAB */
 .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-.summary-card { background: var(--card); border: 1px solid var(--border); padding: 16px; border-radius: 16px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.summary-card { background: var(--card); border: 1px solid var(--border); padding: 16px; border-radius: 16px; backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val)); }
 .sum-label { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
 .sum-val { font-size: 24px; font-weight: 800; }
 
-.limit-box { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 12px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.limit-box { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 12px; backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val)); }
 .input-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px;}
 .limit-input { background: transparent; border: none; color: var(--text); font-size: 24px; font-weight: 800; text-align: right; outline: none; width: 60%; }
 
-.trend-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 16px; height: 140px; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.trend-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 16px; height: 140px; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val)); }
 .trend-bar { flex: 1; background: var(--card2); border-radius: 6px; min-height: 10px; position: relative;}
 .trend-bar.active { background: var(--accent); }
 
@@ -135,6 +186,8 @@ body { background: #000; display: flex; justify-content: center; align-items: ce
 .color-dots { display: flex; gap: 8px; }
 .dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s;}
 .dot.selected { border-color: #fff; transform: scale(1.15);}
+
+.theme-btn.active { background: var(--accent); color: #000 !important; }
 
 .numpad-settings-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; }
 .numpad-setting-input { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 0; border-radius: 8px; font-size: 13px; font-weight: 700; text-align: center; outline: none; width: 100%; }
@@ -154,7 +207,7 @@ body { background: #000; display: flex; justify-content: center; align-items: ce
 /* BOTTOM NAV */
 .bottom-nav {
   position: absolute; bottom: 0; width: 100%; display: flex; justify-content: space-around;
-  padding: 12px 0 24px; background: rgba(18, 18, 18, 0.65); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid var(--border); z-index: 50;
+  padding: 12px 0 24px; background: var(--nav-bg); backdrop-filter: blur(var(--nav-blur)); -webkit-backdrop-filter: blur(var(--nav-blur)); border-top: 1px solid var(--border); z-index: 50;
 }
 .nav-item { color: var(--muted); font-size: 20px; cursor: pointer; transition: color 0.2s, transform 0.2s; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px;}
 .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -169,7 +222,7 @@ body { background: #000; display: flex; justify-content: center; align-items: ce
 .sheet-overlay.open { opacity: 1; visibility: visible; }
 
 .bottom-sheet {
-  position: absolute; bottom: 0; left: 0; right: 0; background: rgba(18, 18, 18, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  position: absolute; bottom: 0; left: 0; right: 0; background: var(--sheet-bg); backdrop-filter: blur(var(--nav-blur)); -webkit-backdrop-filter: blur(var(--nav-blur));
   border-radius: 28px 28px 0 0; border: 1px solid var(--border); border-bottom: none;
   padding: 0 22px 34px; z-index: 101; 
   transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
