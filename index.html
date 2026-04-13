@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" id="theme-color-meta" content="#000000">
+<title>PocketPulse PWA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/src/index.css">
+</head>
+<body>
+
+<div class="app-container">
+
+  <div class="tabs-wrapper" id="tabs-wrapper">
+    <!-- TAB 1: HOME -->
+    <div class="tab-content active" id="tab-home">
+    <div class="header">Home</div>
+    
+    <div class="hero-card">
+      <div class="hero-label" onclick="openPeriodSelector()" style="cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+        <span id="hero-period-text">THIS WEEK'S SPEND</span>
+        <i data-lucide="chevron-down" style="width:16px; height:16px;"></i>
+      </div>
+      <div class="hero-amount" id="hero-total"><span class="currency-symbol">₹</span>0</div>
+      <div style="font-size:13px; color:var(--muted); font-weight: 600;" id="hero-budget-container">of <span id="hero-budget-text">₹3,000</span> limit</div>
+      <div class="hero-budget-bar" id="hero-budget-bar">
+        <div class="hero-budget-fill" id="hero-progress" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Numpad seamlessly integrated -->
+    <div class="numpad-card" id="numpad-wrapper">
+      <div class="np-header">
+        <div class="np-total" id="np-display">Tap a number...</div>
+        <button class="np-undo" onclick="undoTap()">↩</button>
+      </div>
+      
+      <div class="home-cat-slider" id="home-cat-slider">
+        <!-- Generated dynamically -->
+      </div>
+      
+      <div class="np-grid" id="numpad-grid">
+        <!-- Generated dynamically -->
+      </div>
+
+      <div class="np-actions">
+        <button class="action-btn btn-clear" onclick="clearNum()">✗ Clear</button>
+        <button class="action-btn btn-log" onclick="logTransaction()">✓ Log</button>
+      </div>
+    </div>
+
+    <div class="section-label">Recent History</div>
+    <div id="history-container">
+      <!-- Generated dynamically -->
+    </div>
+  </div>
+
+  <!-- TAB 2: REPORTS & LIMITS -->
+  <div class="tab-content" id="tab-reports">
+    <div class="header">Reports & Limits</div>
+
+    <div class="summary-cards" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+      <div class="summary-card" style="padding: 12px;">
+        <div class="sum-label">Spent</div>
+        <div class="sum-val" id="report-spent" style="color:var(--accent); font-size: 16px;">₹0</div>
+      </div>
+      <div class="summary-card" style="padding: 12px;">
+        <div class="sum-label">Earned</div>
+        <div class="sum-val" id="report-earned" style="color:var(--text); font-size: 16px;">₹0</div>
+      </div>
+      <div class="summary-card" style="padding: 12px;">
+        <div class="sum-label">Surplus</div>
+        <div class="sum-val" id="report-surplus" style="color:var(--accent); font-size: 16px;">₹0</div>
+      </div>
+    </div>
+
+    <div class="section-label">Spending Trend</div>
+    <div class="trend-box" id="trend-box">
+      <!-- Generated dynamically based on globalReportPeriod -->
+    </div>
+
+    <div class="section-label">Boundaries</div>
+    <div class="limit-box">
+      <div class="hero-label" id="report-limit-label">Weekly Max Limit</div>
+      <div class="input-row">
+        <span class="currency-symbol" style="font-size:24px; font-weight:800; color:var(--accent)">₹</span>
+        <input type="number" class="limit-input" id="limit-weekly" value="3000" onchange="saveLimit(this.value)">
+      </div>
+    </div>
+    <div class="limit-box">
+      <div class="hero-label" id="report-earnings-label">Expected Earnings</div>
+      <div class="input-row">
+        <span class="currency-symbol" style="font-size:24px; font-weight:800; color:var(--text)">₹</span>
+        <input type="number" class="limit-input" id="limit-earnings" value="8000" onchange="saveEarnings(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: SETTINGS -->
+  <div class="tab-content" id="tab-settings">
+    <div class="header">Settings</div>
+
+    <div class="section-label">Preferences</div>
+    <div class="setting-row">
+      <div class="setting-label">Currency</div>
+      <div class="form-input" style="width: auto; padding: 8px 12px; border-radius: 8px; background: var(--card2); border: 1px solid var(--border); color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="openCurrencySelector()" id="currency-display">
+        <span>₹ (INR)</span>
+        <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-label">Smart Reminders</div>
+      <button class="action-btn btn-clear" style="padding: 8px 16px; width: auto; font-size: 14px;" id="reminder-toggle" onclick="toggleReminders()">Enable</button>
+    </div>
+    <div class="setting-row" id="reminder-time-row" style="display: none;">
+      <div class="setting-label">Time Slot</div>
+      <div class="form-input" style="width: auto; padding: 8px 12px; border-radius: 8px; background: var(--card2); border: 1px solid var(--border); color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="openReminderSelector()" id="reminder-display">
+        <span>Evening (8:00 PM)</span>
+        <i data-lucide="chevron-down" style="width: 16px; height: 16px;"></i>
+      </div>
+    </div>
+
+    <div class="section-label">Customize Numpad</div>
+    <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 12px; padding-top: 0; border-bottom: none;">
+      <div class="numpad-settings-grid" id="numpad-settings-grid">
+        <!-- Generated dynamically -->
+      </div>
+    </div>
+
+    <div class="section-label">Data Export</div>
+    <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+      <div style="display: flex; gap: 8px; width: 100%;">
+        <button class="action-btn btn-clear" style="flex: 1; font-size: 14px;" onclick="exportData('csv')">Export CSV</button>
+        <button class="action-btn btn-clear" style="flex: 1; font-size: 14px;" onclick="exportData('txt')">Export TXT</button>
+      </div>
+    </div>
+
+    <div class="section-label">Appearance</div>
+
+    <div class="setting-row">
+      <div class="setting-label">Accent Color</div>
+      <div class="color-dots">
+        <div class="dot selected" data-color="#C8FF00" style="background:#C8FF00" onclick="setTheme(this, '#C8FF00')"></div>
+        <div class="dot" data-color="#4DBBFF" style="background:#4DBBFF" onclick="setTheme(this, '#4DBBFF')"></div>
+        <div class="dot" data-color="#B46DFF" style="background:#B46DFF" onclick="setTheme(this, '#B46DFF')"></div>
+        <div class="dot" data-color="#FF6B4D" style="background:#FF6B4D" onclick="setTheme(this, '#FF6B4D')"></div>
+      </div>
+    </div>
+
+    <div class="links">
+      <button class="link-btn" onclick="showToast('Terms & Conditions coming soon')">📄 Terms & Conditions</button>
+      <button class="link-btn" onclick="showToast('Privacy Policy coming soon')">🔒 Privacy Policy</button>
+    </div>
+
+    <div class="quote-box">
+      <div class="quote-text">"Take care of the pennies, and the pounds will take care of themselves."</div>
+      <div class="quote-thanks">Thanks for choosing us! 🚀</div>
+    </div>
+
+    <div class="danger-zone" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); margin-bottom: 20px;">
+      <button class="link-btn" style="color: #FF4D4D; border-color: rgba(255, 77, 77, 0.3); width: 100%; text-align: center; background: rgba(255, 77, 77, 0.05);" onclick="confirmWipe()">⚠️ Wipe All Data</button>
+    </div>
+  </div>
+  </div> <!-- END TABS WRAPPER -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('home', this)">
+      <i data-lucide="home"></i><span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('reports', this)">
+      <i data-lucide="bar-chart-2"></i><span class="nav-label">Reports</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('settings', this)">
+      <i data-lucide="settings"></i><span class="nav-label">Settings</span>
+    </div>
+  </div>
+
+  <!-- EDIT BOTTOM SHEET -->
+  <div class="sheet-overlay" id="edit-overlay" onclick="closeEdit(event)">
+    <div class="bottom-sheet" id="edit-sheet">
+      <div class="sheet-handle"></div>
+      <div class="edit-display" id="edit-display">-₹0</div>
+      
+      <div class="input-group">
+        <label class="input-label">Amount (<span class="currency-symbol">₹</span>)</label>
+        <input type="number" class="form-input" id="edit-amt-input" oninput="updateEditDisplay()">
+      </div>
+      
+      <div class="input-group">
+        <label class="input-label">Type</label>
+        <div class="type-toggles">
+          <button class="type-btn active spend" onclick="setType(this, 'spend')">💸 Spend</button>
+          <button class="type-btn earn" onclick="setType(this, 'earn')">💰 Earn</button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Category</label>
+        <div class="icon-slider" id="edit-icon-slider">
+          <!-- Generated dynamically -->
+        </div>
+      </div>
+      
+      <div class="input-group">
+        <label class="input-label">Note</label>
+        <input type="text" class="form-input" id="edit-note-input">
+      </div>
+      
+      <button class="save-btn" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- PERIOD SELECTOR BOTTOM SHEET -->
+  <div class="sheet-overlay" id="period-overlay" onclick="closePeriodSelector(event)">
+    <div class="bottom-sheet" id="period-sheet">
+      <div class="sheet-handle"></div>
+      <h3 style="margin-bottom: 20px; color: #fff; font-size: 20px; text-align: center;">Select Period</h3>
+      <div class="period-options">
+        <div class="period-option" data-period="weekly" onclick="setGlobalPeriod('weekly')">This Week</div>
+        <div class="period-option" data-period="monthly" onclick="setGlobalPeriod('monthly')">This Month</div>
+        <div class="period-option" data-period="yearly" onclick="setGlobalPeriod('yearly')">This Year</div>
+        <div class="period-option" data-period="custom" onclick="setGlobalPeriod('custom')">All Time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CURRENCY SELECTOR BOTTOM SHEET -->
+  <div class="sheet-overlay" id="currency-overlay" onclick="closeCurrencySelector(event)">
+    <div class="bottom-sheet" id="currency-sheet">
+      <div class="sheet-handle"></div>
+      <h3 style="margin-bottom: 20px; color: #fff; font-size: 20px; text-align: center;">Select Currency</h3>
+      <div class="period-options">
+        <div class="period-option currency-option" data-currency="₹" onclick="setCurrency('₹', '₹ (INR)')">₹ (INR)</div>
+        <div class="period-option currency-option" data-currency="$" onclick="setCurrency('$', '$ (USD)')">$ (USD)</div>
+        <div class="period-option currency-option" data-currency="€" onclick="setCurrency('€', '€ (EUR)')">€ (EUR)</div>
+        <div class="period-option currency-option" data-currency="£" onclick="setCurrency('£', '£ (GBP)')">£ (GBP)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REMINDER SELECTOR BOTTOM SHEET -->
+  <div class="sheet-overlay" id="reminder-overlay" onclick="closeReminderSelector(event)">
+    <div class="bottom-sheet" id="reminder-sheet">
+      <div class="sheet-handle"></div>
+      <h3 style="margin-bottom: 20px; color: #fff; font-size: 20px; text-align: center;">Select Time Slot</h3>
+      <div class="period-options">
+        <div class="period-option reminder-option" data-time="14" onclick="saveReminderTime('14', 'Afternoon (2:00 PM)')">Afternoon (2:00 PM)</div>
+        <div class="period-option reminder-option" data-time="20" onclick="saveReminderTime('20', 'Evening (8:00 PM)')">Evening (8:00 PM)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIPE CONFIRM OVERLAY -->
+  <div class="sheet-overlay" id="wipe-confirm-overlay" onclick="cancelWipe(event)">
+    <div class="bottom-sheet" id="wipe-sheet" style="text-align: center;">
+      <div class="sheet-handle"></div>
+      <h3 style="margin-bottom: 10px; color: #FF4D4D; font-size: 20px;">Wipe All Data?</h3>
+      <p style="color: var(--muted); font-size: 14px; margin-bottom: 24px;">This action cannot be undone. All your transactions and settings will be permanently deleted.</p>
+      <div style="display: flex; gap: 12px;">
+        <button class="action-btn btn-clear cancel-btn" style="flex: 1;" onclick="cancelWipe(event)">Cancel</button>
+        <button class="action-btn" style="flex: 1; background: #FF4D4D; color: #fff;" onclick="executeWipe()">Yes, Wipe It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
+
