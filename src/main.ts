@@ -600,9 +600,9 @@ async function updateState() {
   const reportEarningsLabel = document.getElementById('report-earnings-label');
   if (reportEarningsLabel) reportEarningsLabel.innerText = `${periodStr} EXPECTED EARNINGS`;
 
-  const limitWeeklyInput = document.getElementById('limit-weekly') as HTMLInputElement;
-  if (limitWeeklyInput && document.activeElement !== limitWeeklyInput) {
-    limitWeeklyInput.value = scaledLimit.toString();
+  const limitValueInput = document.getElementById('limit-value') as HTMLInputElement;
+  if (limitValueInput && document.activeElement !== limitValueInput) {
+    limitValueInput.value = scaledLimit.toString();
   }
   const limitEarningsInput = document.getElementById('limit-earnings') as HTMLInputElement;
   if (limitEarningsInput && document.activeElement !== limitEarningsInput) {
