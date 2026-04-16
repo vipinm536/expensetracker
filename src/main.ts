@@ -1,5 +1,5 @@
 import './index.css';
-import { createIcons, Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2, ChevronDown } from 'lucide';
+import { createIcons, Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2, ChevronDown, Search, HeartPulse, GraduationCap, Home as HomeIcon, Smartphone, Gift, Briefcase, X, Filter } from 'lucide';
 
 // --- DATABASE (IndexedDB) ---
 const DB_NAME = 'PocketPulseDB';
@@ -100,6 +100,9 @@ let weeklyBudget = 3000;
 let acc = 0;
 let tapHistory: number[] = [];
 let globalCurrency = '₹';
+let historySearchQuery = '';
+let historySearchDate = '';
+let historySearchCategory = '';
 let appTheme: 'glass' | 'solid' = 'glass';
 let remindersEnabled = false;
 let reminderTime = '20';
@@ -248,7 +251,13 @@ const CATEGORIES = [
   { id: 'circle-dollar-sign', name: 'Money' },
   { id: 'gamepad-2', name: 'Entertainment' },
   { id: 'coffee', name: 'Coffee' },
-  { id: 'plane', name: 'Travel' }
+  { id: 'plane', name: 'Travel' },
+  { id: 'heart-pulse', name: 'Health' },
+  { id: 'graduation-cap', name: 'Education' },
+  { id: 'home', name: 'Housing' },
+  { id: 'smartphone', name: 'Bills' },
+  { id: 'gift', name: 'Gifts' },
+  { id: 'briefcase', name: 'Work' }
 ];
 let selectedHomeCategory = CATEGORIES[0];
 let globalReportPeriod: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'weekly';
@@ -334,7 +343,7 @@ function renderHomeCategories() {
   
   // Re-initialize icons for the newly rendered buttons
   createIcons({
-    icons: { Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2 }
+    icons: { Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2, Search, HeartPulse, GraduationCap, HomeIcon, Smartphone, Gift, Briefcase, X, Filter }
   });
   
   // Update contrast for the new buttons based on current theme
@@ -356,7 +365,7 @@ function renderEditCategories() {
   });
   
   createIcons({
-    icons: { Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2 }
+    icons: { Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2, Search, HeartPulse, GraduationCap, HomeIcon, Smartphone, Gift, Briefcase, X, Filter }
   });
 }
 
@@ -374,6 +383,66 @@ function renderEditCategories() {
   numpadValues[index] = val;
   await setSetting('numpadValues', numpadValues);
   renderNumpad();
+};
+
+(window as any).toggleSearchFilters = function() {
+  const container = document.getElementById('search-filters-container');
+  if (container) {
+    if (container.classList.contains('hidden')) {
+      container.classList.remove('hidden');
+      renderSearchCategories();
+    } else {
+      container.classList.add('hidden');
+      (window as any).clearSearchFilters();
+    }
+  }
+};
+
+(window as any).filterHistoryText = function() {
+  const input = document.getElementById('history-search-input') as HTMLInputElement;
+  if (input) {
+    historySearchQuery = input.value;
+    updateState();
+  }
+};
+
+function renderSearchCategories() {
+  const slider = document.getElementById('search-cat-slider');
+  if (!slider) return;
+  slider.innerHTML = '';
+  
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('div');
+    btn.className = `search-cat-btn ${cat.id === historySearchCategory ? 'selected' : ''}`;
+    btn.onclick = () => {
+      historySearchCategory = historySearchCategory === cat.id ? '' : cat.id;
+      renderSearchCategories();
+      updateState();
+    };
+    btn.innerHTML = `<i data-lucide="${cat.id}"></i>`;
+    slider.appendChild(btn);
+  });
+  
+  createIcons({
+    icons: { Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2, Search, HeartPulse, GraduationCap, HomeIcon, Smartphone, Gift, Briefcase, X, Filter }
+  });
+}
+
+(window as any).clearSearchFilters = function() {
+  const dateInput = document.getElementById('history-search-date') as HTMLInputElement;
+  if (dateInput) dateInput.value = '';
+  historySearchDate = '';
+  historySearchCategory = '';
+  renderSearchCategories();
+  updateState();
+};
+
+(window as any).filterHistory = function() {
+  const dateInput = document.getElementById('history-search-date') as HTMLInputElement;
+  if (dateInput) {
+    historySearchDate = dateInput.value;
+  }
+  updateState();
 };
 
 async function updateState() {
@@ -523,24 +592,13 @@ async function updateState() {
   }
   
   // Update Inputs (only if not focused to avoid overriding user typing)
-  const limitLabelMap: Record<string, string> = {
-    'weekly': "WEEKLY MAX LIMIT",
-    'monthly': "MONTHLY MAX LIMIT",
-    'yearly': "YEARLY MAX LIMIT",
-    'custom': "ALL TIME MAX LIMIT"
-  };
-  const earnLabelMap: Record<string, string> = {
-    'weekly': "WEEKLY EXPECTED EARNINGS",
-    'monthly': "MONTHLY EXPECTED EARNINGS",
-    'yearly': "YEARLY EXPECTED EARNINGS",
-    'custom': "ALL TIME EXPECTED EARNINGS"
-  };
-
+  const periodStr = globalReportPeriod === 'custom' ? 'ALL TIME' : globalReportPeriod.toUpperCase();
+  
   const reportLimitLabel = document.getElementById('report-limit-label');
-  if (reportLimitLabel) reportLimitLabel.innerText = limitLabelMap[globalReportPeriod];
+  if (reportLimitLabel) reportLimitLabel.innerText = `${periodStr} MAX LIMIT`;
 
   const reportEarningsLabel = document.getElementById('report-earnings-label');
-  if (reportEarningsLabel) reportEarningsLabel.innerText = earnLabelMap[globalReportPeriod];
+  if (reportEarningsLabel) reportEarningsLabel.innerText = `${periodStr} EXPECTED EARNINGS`;
 
   const limitWeeklyInput = document.getElementById('limit-weekly') as HTMLInputElement;
   if (limitWeeklyInput && document.activeElement !== limitWeeklyInput) {
@@ -555,10 +613,30 @@ async function updateState() {
   const historyContainer = document.getElementById('history-container');
   if (historyContainer) {
     historyContainer.innerHTML = '';
-    const recentTxs = txs.slice(0, 50); // Show last 50 transactions regardless of period
+    let recentTxs = txs;
+    
+    if (historySearchDate) {
+      const searchDate = new Date(historySearchDate);
+      recentTxs = recentTxs.filter(tx => {
+        const txDate = new Date(tx.timestamp);
+        return txDate.getFullYear() === searchDate.getFullYear() &&
+               txDate.getMonth() === searchDate.getMonth() &&
+               txDate.getDate() === searchDate.getDate();
+      });
+    }
+    
+    if (historySearchCategory) {
+      recentTxs = recentTxs.filter(tx => tx.icon === historySearchCategory);
+    }
+    
+    recentTxs = recentTxs.slice(0, 50); // Show last 50 transactions
     recentTxs.forEach((tx, index) => {
       const date = new Date(tx.timestamp);
       const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const today = new Date();
+      const isToday = date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+      const dateStr = isToday ? 'Today' : date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      const dateTimeStr = `${dateStr}, ${timeStr}`;
       
       const isSpend = tx.type === 'spend';
       const amtClass = isSpend ? 'spend' : (tx.type === 'earn' ? 'earn' : 'lend');
@@ -577,7 +655,7 @@ async function updateState() {
                 <div class="entry-icon" style="background:${iconBg}; color:${iconColor}"><i data-lucide="${safeIcon}"></i></div>
                 <div>
                   <div class="entry-note">${tx.note}</div>
-                  <div class="entry-time">${timeStr}</div>
+                  <div class="entry-time">${dateTimeStr}</div>
                 </div>
               </div>
               <div class="entry-amt ${amtClass}">${sign}<span class="currency-symbol">${globalCurrency}</span>${tx.amount.toLocaleString()}</div>
@@ -595,7 +673,7 @@ async function updateState() {
   
   // Re-initialize Lucide icons for dynamically added elements
   createIcons({
-    icons: { Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2, ChevronDown }
+    icons: { Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2, ChevronDown, Search, HeartPulse, GraduationCap, HomeIcon, Smartphone, Gift, Briefcase, X, Filter }
   });
 }
 
@@ -1103,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Initialize Lucide icons on first load
   createIcons({
-    icons: { Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2, ChevronDown }
+    icons: { Home, BarChart2, Settings, Zap, Utensils, Car, ShoppingCart, CircleDollarSign, Gamepad2, Coffee, Plane, Edit2, Trash2, ChevronDown, Search, HeartPulse, GraduationCap, HomeIcon, Smartphone, Gift, Briefcase, X, Filter }
   });
 
   // --- SWIPE NAVIGATION LOGIC ---

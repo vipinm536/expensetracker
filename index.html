@@ -58,7 +58,23 @@
       </div>
     </div>
 
-    <div class="section-label">Recent History</div>
+    <div class="section-header">
+      <div class="section-label">Recent History</div>
+      <button class="icon-btn" onclick="toggleSearchFilters()"><i data-lucide="filter" style="width: 18px; height: 18px;"></i></button>
+    </div>
+    <div class="search-input-wrapper">
+      <i data-lucide="search" class="search-input-icon"></i>
+      <input type="text" id="history-search-input" placeholder="Search transactions..." oninput="filterHistoryText()">
+    </div>
+    <div id="search-filters-container" class="search-filters-container hidden">
+      <div class="search-filters">
+        <input type="date" id="history-search-date" onchange="filterHistory()" class="search-date-input">
+        <div class="search-cat-slider" id="search-cat-slider">
+          <!-- Generated dynamically -->
+        </div>
+        <button class="icon-btn clear-search-btn" onclick="clearSearchFilters()"><i data-lucide="x" style="width: 18px; height: 18px;"></i></button>
+      </div>
+    </div>
     <div id="history-container">
       <!-- Generated dynamically -->
     </div>
